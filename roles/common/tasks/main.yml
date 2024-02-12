@@ -1,0 +1,5 @@
+---
+# tasks file for common
+- name: Create User 
+  import_tasks: create-user.yml
+  become: true

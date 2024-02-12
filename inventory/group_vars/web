@@ -1,0 +1,39 @@
+node_home: "/opt/web"
+web_home: "/opt/web"
+repo_url: "{{ git_org }}/hsense-web-app.git"
+branch: "1.21.0"
+dest_dir: '/tmp/helix-web-app'
+
+nodejs_version: 12
+
+vhosts:
+  helix-dev1:
+    vhost_name: 'dev1.helixsense.com'
+    web_port: 3000
+    proxy_pass_url: 'http://localhost:3000'
+    selfSigned: true #Creates self-signed certificate based on vhost_name, else uses tls_key and tls_cert
+    #tls_key: 'path-to-file'
+    #tls_cert: 'path-to-file'
+    node_home: "{{ web_home }}" #node_home will suffixed with vhost provided
+    #node_artifact_loc:  #location of the artifact to be download Nexus or blob or S3 bucket
+    node_port: 3000 #Make sure NOT to conflict with other nodes in other sections of web > vars > vhosts
+  helix-dev2:
+    vhost_name: 'dev2.helixsense.com'
+    web_port: 3001
+    proxy_pass_url: 'http://localhost:3001'
+    selfSigned: true #Creates self-signed certificate based on vhost_name, else uses tls_key and tls_cert
+    #tls_key: 'path-to-file'
+    #tls_cert: 'path-to-file'
+    node_home: "{{ web_home }}" #node_home will suffixed with vhost provided
+    #node_artifact_loc:  #location of the artifact to be download Nexus or blob or S3 bucket
+    node_port: 3001 #Make sure NOT to conflict with other nodes in other sections of web > vars > vhosts
+  # helix-dev3:
+  #   vhost_name: 'dev3.helixsense.com'
+  #   web_port: 3002
+  #   proxy_pass_url: 'http://localhost:3002'
+  #   selfSigned: true #Creates self-signed certificate based on vhost_name, else uses tls_key and tls_cert 
+  #   #tls_key: 'path-to-file'
+  #   #tls_cert: 'path-to-file'
+  #   node_home: "{{ web_home }}" #node_home will suffixed with vhost provided
+  #   #node_artifact_loc:  #location of the artifact to be download Nexus or blob or S3 bucket
+  #   node_port: 3002 #Make sure NOT to conflict with other nodes in other sections of web > vars > vhosts

@@ -1,0 +1,7 @@
+- name: Copy Helix Artifacts to {{ helix_home }}
+  copy:
+    src: "{{ odoo_installer }}/helix-addons"
+    dest: "{{ helix_home }}/"
+    remote_src: yes
+    owner: "{{ adm_usr }}"
+    group: "{{ adm_usr }}"

@@ -1,0 +1,5 @@
+---
+# tasks file for upgrade
+- name: "OS Update"
+  import_tasks: osUpdate.yml
+  become: true

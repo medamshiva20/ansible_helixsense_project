@@ -1,0 +1,15 @@
+---
+- hosts: web
+  become: yes
+  
+  tasks:
+  - name: setting the instance name as fact
+    set_fact:
+      web_dir: "/opt/web/{{ item.vhost_name }}/helix-web-app"
+    with_items: "{{ vhosts.values() }}"
+    register: web_dir_result
+  
+  - name: displaying results
+    debug:
+      msg: "Type of variable vhosts is {{ item }}"
+    loop: "{{ web_dir_result.results|json_query('[].ansible_facts.web_dir') }}"

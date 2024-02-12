@@ -1,0 +1,33 @@
+- name: "Create {{ node_home }}/{{ item.value.vhost_name }} if it does not exist"
+  file:
+    path: "{{ node_home }}/{{ item.value.vhost_name }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ adm_usr }}"
+    group: "{{ adm_usr }}"
+  become: true
+
+- name: "Copy web artifacts to {{ node_home }}/{{ item.value.vhost_name }}"
+  copy:
+    src: "{{ dest_dir }}" ##Artifact location
+    dest: "{{ node_home }}/{{ item.value.vhost_name }}"
+    remote_src: yes
+    owner: "{{ adm_usr }}"
+    group: "{{ adm_usr }}"
+  become: true
+
+- name: Install packages based on package.json.
+  yarn:
+    path: "{{ node_home }}/{{ item.value.vhost_name }}/helix-web-app/"
+  become: true
+
+- name: Generate dist folder.
+  shell: yarn run dev
+  args: 
+    chdir: "{{ node_home }}/{{ item.value.vhost_name }}/helix-web-app/"
+  become: true
+
+- name: pm2 start server.js
+  shell: pm2 -f start server.js
+  args:
+    chdir: "{{ node_home }}/{{ item.value.vhost_name }}/helix-web-app/"

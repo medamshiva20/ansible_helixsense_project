@@ -1,0 +1,26 @@
+- name: "Backup existing database to a file (with compression)"
+  postgresql_db:
+    name: "{{ db_name }}"
+    state: dump
+    target: "{{ bkp_to }}"
+  when: "db_backup == true"
+
+- name: "Restore db from a backup file to {{ db_name }}"
+  postgresql_db:
+    name: "{{ db_name }}"
+    state: restore
+    target: "{{ bkp_frm }}"
+  when: "db_restore  == true"
+  register: restore_out
+
+- debug:
+    var: restore_out.changed
+
+#
+# - name: Scramble data after restore
+#   postgresql_query:
+#     db: "{{ db_name }}"
+#     query: INSERT INTO test_table (id, story) VALUES (2, 'my_long_story')
+#   when: 
+#      - "db_restore  == true"
+#      - restore_out.changed == true

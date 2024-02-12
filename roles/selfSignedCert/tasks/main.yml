@@ -1,0 +1,5 @@
+---
+# tasks file for selfSignedCert
+- name: "Install Update HelixSense Add-Ons"
+  import_tasks: createSelfSigned.yml
+  become: true

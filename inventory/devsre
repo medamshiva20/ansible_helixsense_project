@@ -1,0 +1,13 @@
+[all]
+hsense-devsre-web ansible_host=20.207.202.11
+hsense-devsre-api ansible_host=20.207.202.11
+hsense-devsre-db ansible_host=20.207.202.11
+
+[web]
+hsense-devsre-web
+
+[api]
+hsense-devsre-api
+
+[db]
+hsense-devsre-db

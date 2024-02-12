@@ -1,0 +1,16 @@
+[Unit]
+Description={{ helix_instance_name }}
+Requires=network.target
+After=syslog.target network.target
+
+[Service]
+Type=simple
+SyslogIdentifier={{ helix_instance_name }}
+PermissionsStartOnly=true
+User={{ adm_usr }}
+Group={{ adm_usr }}
+ExecStart={{ helix_home }}/odoo-venv/bin/python3 {{ helix_home }}/odoo/odoo-bin -c /etc/{{ helix_instance_name }}/helixsense.conf
+StandardOutput=journal+console
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,16 @@
+
+- name: Install setuptools in venv
+  pip:
+    name: setuptools==39
+    virtualenv: "{{ helix_home }}/{{ venv_dir }}"
+
+- name: "Create Venv and install requirements {{ python_req_file }}"
+  pip: 
+    requirements: "{{ python_req_file }}"
+    virtualenv: "{{ helix_home }}/{{ venv_dir }}"
+    virtualenv_python: python3  
+
+- name: Install other dependencies in venv
+  pip:
+    name: ['pkce','pymysql','phonenumbers','twilio','oauthlib']
+    virtualenv: "{{ helix_home }}/{{ venv_dir }}"

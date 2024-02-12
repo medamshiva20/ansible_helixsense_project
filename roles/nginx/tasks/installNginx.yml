@@ -1,0 +1,31 @@
+
+- name: Install python-pip
+  apt: 
+    name: python-pip
+    state: present
+
+- name: Install Crypto Dependencies
+  pip: 
+    name: cryptography
+    state: present
+
+- name: Install Nginx Ubuntu
+  apt: 
+    name: nginx
+    state: present  
+  when:
+     - ansible_os_family == 'Debian'
+
+- name: Install Nginx YUM
+  yum: 
+    name: nginx
+    state: present
+  when:
+     - ansible_os_family == 'RedHat'
+
+# - name: Add Nginx as a service
+#   service:
+#     name: nginx
+#     state: started
+#     enabled: yes
+    

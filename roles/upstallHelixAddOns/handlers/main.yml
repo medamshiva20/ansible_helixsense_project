@@ -1,0 +1,13 @@
+---
+# handlers file for upstallHelixAddOns
+- name: Restart HelixSense Service
+  become: true
+  service:
+    name: "{{ helix_instance_name }}"
+    state: restarted
+
+- name: Stop HelixSense Service
+  become: true
+  service:
+    name: "{{ helix_instance_name }}"
+    state: stop

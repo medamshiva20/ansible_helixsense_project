@@ -1,0 +1,170 @@
+parameters:
+  - name: customer
+    displayName: 'select customer'
+    type: string
+    values:
+      - cbre
+      - hsense
+  - name: environment
+    displayName: 'select environment'
+    type: string
+    values:
+      - dev
+      - devsre
+      - qa
+      - qasre
+      - stage
+      - preprod
+      - prod
+  - name: release_candidate
+    displayName: 'enter nexus release name'
+    type: string
+    values:
+      - snapshot
+      - release
+  - name: artifact_release
+    displayName: 'enter artifact release version'
+    type: string
+    values:
+      - 1.6.0
+  - name: minor_version
+    displayName: 'enter minor version'
+    type: string
+    values:
+      - 13604
+
+variables:
+  - group: ${{ parameters.customer }}-${{ parameters.environment }}-web
+  - group: nexus-credentials
+  - group: Android-Credentials
+  - name: webappurl
+    value: hsense-web-${{ parameters.customer }}-${{ parameters.environment }}-webAppUrl
+  - name: appversion
+    value: hsense-web-${{ parameters.customer }}-${{ parameters.environment }}-appVersion
+  - name: useapigateway
+    value: hsense-web-${{ parameters.customer }}-${{ parameters.environment }}-useApigateway
+  - name: googleapikey
+    value: hsense-web-${{ parameters.customer }}-${{ parameters.environment }}-googleApiKey
+  - name: googlecaptchasitekey
+    value: hsense-web-${{ parameters.customer }}-${{ parameters.environment }}-googleCaptchaSiteKey
+  - name: googlecaptchasecretkey
+    value: hsense-web-${{ parameters.customer }}-${{ parameters.environment }}-googleCaptchaSecretKey
+  - name: powerbiexpiry
+    value: hsense-web-${{ parameters.customer }}-${{ parameters.environment }}-powerbiExpiry
+  - name: powerbiclientid
+    value: hsense-web-${{ parameters.customer }}-${{ parameters.environment }}-powerBIClientId
+  - name: powerbiclientsecret
+    value: hsense-web-${{ parameters.customer }}-${{ parameters.environment }}-powerBIClientSecret
+  - name: powerbitenantid
+    value: hsense-web-${{ parameters.customer }}-${{ parameters.environment }}-powerBITenantId
+  - name: granytype
+    value: hsense-web-${{ parameters.customer }}-${{ parameters.environment }}-granyType
+  - name: refreshgranttype
+    value: hsense-web-${{ parameters.customer }}-${{ parameters.environment }}-refreshGrantType
+  - name: clientname
+    value: hsense-web-${{ parameters.customer }}-${{ parameters.environment }}-clientName
+  - name: onesignalappid
+    value: hsense-web-${{ parameters.customer }}-${{ parameters.environment }}-oneSignalAppId
+  - name: env
+    value: hsense-web-${{ parameters.customer }}-${{ parameters.environment }}-env
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - script: |
+      echo "show variables and list contents"
+      echo $(${{ variables.webappurl }})
+      echo $(${{ variables.webapiurl }})
+      echo $(${{ variables.appversion }})
+      echo $(${{ variables.useapigateway }})
+      echo $(${{ variables.googleapikey }})
+      echo $(${{ variables.googlecaptchasitekey }})
+      echo $(${{ variables.googlecaptchasecretkey }})
+      echo $(${{ variables.powerbiexpiry }})
+      echo $(${{ variables.powerbiclientid }})
+      echo $(${{ variables.powerbiclientsecret }})
+      echo $(${{ variables.powerbitenantid }})
+      echo $(${{ variables.granytype }})
+      echo $(${{ variables.refreshgranttype }})
+      echo $(${{ variables.clientname }})
+      echo $(${{ variables.onesignalappid }})
+      echo $(${{ variables.env }})
+    displayName: "show variables"
+
+  - script: |
+      echo "generate env.sh file"
+      pwd
+      echo "REACT_APP_WEBAPIURL=$(${{ variables.webappurl }}) REACT_APP_VERSION=$(${{ variables.appversion }}) REACT_APP_IS_USE_APIGATEWAY=$(${{ variables.useapigateway }}) REACT_APP_GOOGLE_API_KEY=$(${{ variables.googleapikey }}) REACT_APP_GOOGLE_CAPTCHA_SITE_KEY=$(${{ variables.googlecaptchasitekey }}) REACT_APP_GOOGLE_CAPTCHA_SECRET_KEY=$(${{ variables.googlecaptchasecretkey }}) REACT_APP_POWERBI_EXPIRY=$(${{ variables.powerbiexpiry }}) REACT_APP_GRANYTYPE=$(${{ variables.granytype }}) REACT_APP_REFRESHGRANTTYPE=$(${{ variables.refreshgranttype }}) REACT_APP_CLIENT_NAME=$(${{ variables.clientname }}) REACT_APP_ONESIGNALAPPID=$(${{ variables.onesignalappid }}) REACT_APP_ENV=$(${{ variables.env }}) npx react-inject-env set --dir dist" > env.sh
+      ls -lrth
+      cat env.sh
+    displayName: "create env.sh file"
+
+  - script: |
+      echo "generate run.sh file"
+      echo "API_URL=$(${{ variables.webappurl }}) BASE_URL=$(${{ variables.webapiurl }}) REACT_APP_WEB_URL=$(${{ variables.webappurl }}) SERVER_PORT=3003 POWERBI_CLIENTID=$(${{ variables.powerbiclientid }}) POWERBI_CLIENTSECRET=$(${{ variables.powerbiclientsecret }}) POWERBI_GRANYTYPE=$(${{ variables.granytype }}) POWERBI_TENANTID=$(${{ variables.powerbitenantid }}) REACT_APP_WEB_URL=$(${{ variables.webappurl }}) pm2 start server.js" > run.sh
+      cat run.sh
+    displayName: "create run.sh file"
+
+  - task: DownloadSecureFile@1
+    name: keyStoreDetails
+    displayName: 'Download ansible private key'
+    inputs:
+      secureFile: 'id_rsa'
+
+  - script: |
+      echo "show variables and list contents"
+      echo ${{ parameters.environment }}
+      echo ${{ parameters.customer }}
+      echo "copied $(keyStoreDetails.secureFilePath) to the base directory"
+      cp $(keyStoreDetails.secureFilePath) .
+      ls
+      chmod 0400 id_rsa
+      ls -lrth id_rsa
+    displayName: "show variables and change permission for key"
+
+  - script: |
+      echo "download artifact from nexus"
+      curl -X GET -u admin:Nexus@123 -L "http://20.127.165.58:8081/repository/artifacts/${{ parameters.artifact_release }}/hsensewebapp/${{ parameters.release_candidate }}/hsensewebapp-${{ parameters.artifact_release }}-${{ parameters.minor_version }}.zip" --output hsensewebapp-${{ parameters.artifact_release }}.zip
+    displayName: "download artifact from nexus"
+
+  - script: |
+      echo "get the ip address of the machine"
+      ansible -i inventory/${{ parameters.environment }} -m debug -a "var=hostvars[inventory_hostname].ansible_host" ${{ parameters.customer }}-${{ parameters.environment }}>ip.txt
+      ipaddress=`cat ip.txt | grep -o '"[^"]*"\s*:\s*"[^"]*"' | cut -d: -f2 | tr -d '"' | xargs echo -n`
+      echo $ipaddress
+      echo ${{ parameters.artifact_release }}
+      ls -lrth
+      cat id_rsa
+    displayName: "get the ip address of the machine"
+
+  - script: |
+      echo "find the artifact"
+      find . -name *.zip | basename *.zip>artifact.txt
+      cat artifact.txt
+      mkdir artifacts
+      mv `cat artifact.txt` artifacts/
+      mv artifacts/* artifacts/hsensewebapp.zip
+      ls -l artifacts/
+    displayName: "find the artifact"
+
+  # - script: |
+  #     echo "copy artifact to server"
+  #     scp -i id_rsa hsensewebapp-${{ parameters.artifact_release }}-rc.1.zip ansible@$ipaddress:/tmp
+  #   displayName: "copy artifact to ${{ parameters.customer }}-${{ parameters.environment }} server"
+
+  # - script: |
+  #     echo "copy script to server"
+  #     scp -i id_rsa env.sh ansible@$ipaddress:/tmp
+  #   displayName: "copy env.sh script to ${{ parameters.customer }}-${{ parameters.environment }} server"
+
+  # - script: |
+  #     echo "copy script to server"
+  #     scp -i id_rsa run.sh ansible@$ipaddress:/tmp
+  #   displayName: "copy run.sh script to ${{ parameters.customer }}-${{ parameters.environment }} server"
+
+  - script: |
+      echo "run playbook"
+      echo "Running ansible playbook for ${{ parameters.customer }}-${{ parameters.environment }}"
+      ansible-playbook -i inventory/${{ parameters.environment }} deploy-web.yml -l ${{ parameters.customer }}-${{ parameters.environment }} --ssh-common-args='-o StrictHostKeyChecking=no' -u ansible --key-file ./id_rsa -v
+    displayName: "Running Ansible Playbook for Web"

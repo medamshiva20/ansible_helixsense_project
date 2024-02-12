@@ -1,0 +1,7 @@
+git_token: ''
+git_org: 'https://{{ git_token }}@github.com/HelixSense'
+helix_instance_name: 'helixcust01'
+adm_usr: 'helixsense'
+db_name: "{{ helix_instance_name }}db"
+db_user: "{{ helix_instance_name }}_dbuser"
+db_password: "{{ helix_instance_name }}dbpwd987!"

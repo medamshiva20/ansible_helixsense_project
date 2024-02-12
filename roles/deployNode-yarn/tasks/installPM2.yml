@@ -1,0 +1,43 @@
+
+- name: Install Ansible PM2 Module
+  pip:
+    name: ansible-modules-pm2
+    executable: pip3
+
+# npm requires node to be installed, the next 6 tasks were due to that.
+- name: setup web | Install the gpg key for nodejs LTS
+  apt_key:
+    url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
+    state: present
+
+- name: setup web | Install the nodejs LTS repos
+  apt_repository:
+    repo: "deb https://deb.nodesource.com/node_{{ nodejs_version }}.x {{ ansible_distribution_release }} main"
+    state: present
+    update_cache: yes
+
+- name: setup web | install nodejs
+  apt:
+    name: nodejs
+    state: present
+
+- name: setup web | add key for yarn
+  apt_key: 
+    url: "https://dl.yarnpkg.com/debian/pubkey.gpg"
+    state: present
+
+- name: setup web | adding yarn repo
+  apt_repository:
+    repo: "deb https://dl.yarnpkg.com/debian/ stable main"
+    state: present
+    update_cache: yes
+
+- name: setup web | update package list and install yarn
+  apt: 
+    name: yarn
+    state: present
+
+- name: Install PM2
+  npm:
+    name: pm2
+    global: yes

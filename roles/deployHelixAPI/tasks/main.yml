@@ -1,0 +1,9 @@
+---
+# tasks file for deployHelixAPI
+- name: Copy API artifacts 
+  import_tasks: copyArtifacts.yml
+  become: true
+  
+- name: Configure API
+  import_tasks: configureAPI.yml
+  become: true

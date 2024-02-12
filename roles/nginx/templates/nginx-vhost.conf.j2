@@ -1,0 +1,31 @@
+server {
+
+  server_name {{ hx_vhost }};
+
+  location / {
+      proxy_pass {{ proxy_url }};
+  }
+
+    #listen [::]:443 ssl ipv6only=on; 
+    listen 443 ssl; 
+    ssl_certificate /etc/nginx/sites-available/{{ hx_vhost }}.pem; 
+    ssl_certificate_key /etc/nginx/sites-available/{{ hx_vhost }}.key; 
+    #include /etc/letsencrypt/options-ssl-nginx.conf; 
+    #ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; 
+
+}
+
+server {
+    if ($host = {{ hx_vhost }}) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+  listen 80;
+  listen [::]:80;
+
+  server_name {{ hx_vhost }};
+    return 404; # managed by Certbot
+
+
+}

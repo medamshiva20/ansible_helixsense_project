@@ -1,0 +1,10 @@
+- name: Create {{ adm_usr }} user
+  ansible.builtin.user:
+    name: "{{ adm_usr }}"
+    shell: /bin/bash
+    home: /opt
+
+- name: Install packages
+  apt: 
+    name: ['build-essential', 'gcc', 'make', 'libpng-dev', 'unzip']
+    state: present

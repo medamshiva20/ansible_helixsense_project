@@ -1,0 +1,37 @@
+
+- name: "Install python3-apt"
+  apt:
+    name: "{{ deb_dependencies }}"
+    state: present
+  when:
+     - ansible_os_family == 'Debian'
+     
+#- ansible_distribution_version >= "16" and ansible_distribution_version < "20"
+
+
+- name: "Install python3-yum"
+  yum:
+    name: python3
+    state: present
+  when:
+     - ansible_os_family == 'RedHat'
+
+
+- name: "Install setuptools Ubuntu < 20"
+  apt:
+    name: ['python-setuptools']
+    state: present
+  when:
+     - ansible_distribution == "Ubuntu"
+     - ansible_distribution_version >= "16" and ansible_distribution_version < "20"
+
+
+- name: Install setuptools
+  pip:
+    name: setuptools
+    executable: pip3
+
+- name: "Install virtualenv"
+  pip:
+    name: virtualenv
+    executable: pip3

@@ -1,0 +1,5 @@
+---
+# handlers file for deployHelixAPI
+- name: "Reload systemctl"
+  command: systemctl daemon-reload || /bin/true
+  become: true

@@ -1,0 +1,51 @@
+- name: "Create {{ db_user }} and grant {{ postgresql_privileges }} privileges"
+  become_user: postgres
+  postgresql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    role_attr_flags: "{{ postgresql_privileges }}"
+    
+- name: "Get Postgres version"
+  become_user: postgres
+  postgresql_info:
+    filter: ver*,ext*,settings
+  register: pstgre_info
+
+- debug:
+    var: pstgre_info.settings.hba_file.setting
+
+- name: "Create database {{ db_name }} "
+  become_user: postgres
+  postgresql_db:
+    name: "{{ db_name }}"
+    owner: "{{ db_user }}"
+
+- name: "Grant {{ db_user }} remote access to {{ db_name }}"
+  become_user: postgres
+  postgresql_pg_hba:
+    dest: "{{ pstgre_info.settings.hba_file.setting }}"
+    contype: host
+    users: "{{ db_user }}"
+    databases: all
+    method: md5
+    source: 0.0.0.0/0
+  notify: 
+    - Restart postgresql
+
+- name: Set postgresql to listen on all interfaces
+  become_user: postgres
+  postgresql_set:
+    name: listen_addresses
+    value: "*"
+  register: set
+  notify: 
+    - Restart postgresql
+
+
+# - name: Print the result if the setting changed
+#   ansible.builtin.debug:
+#     msg: "{{ set.name }} {{ set.prev_val_pretty }} >> {{ set.value_pretty }} restart_req: {{ set.restart_required }}"
+#   when: set.changed
+  
+
+ 

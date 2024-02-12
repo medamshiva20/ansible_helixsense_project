@@ -1,0 +1,13 @@
+[all]
+hsense-qa-web ansible_host=13.90.118.123
+hsense-qa-api ansible_host=13.90.118.123
+hsense-qa-db ansible_host=13.90.118.123
+
+[web]
+hsense-qa-web
+
+[api]
+hsense-qa-api
+
+[db]
+hsense-qa-db

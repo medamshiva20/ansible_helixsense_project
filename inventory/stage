@@ -1,0 +1,13 @@
+[all]
+cbre-stage-api ansible_host=52.140.123.234
+cbre-stage-db ansible_host=52.140.123.234
+cbre-stage-web ansible_host=52.140.123.234
+
+[web]
+cbre-stage-web
+
+[api]
+cbre-stage-api
+
+[db]
+cbre-stage-db

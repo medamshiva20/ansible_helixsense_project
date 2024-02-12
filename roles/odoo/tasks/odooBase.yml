@@ -1,0 +1,29 @@
+- name: "Check {{ helix_home }} Directory exists"
+  stat: 
+    path: "{{ helix_home }}"
+  register: out
+
+- debug:
+    var: out
+
+- name: "Create {{ helix_home }} if it does not exist"
+  file:
+    path: "{{ helix_home }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ adm_usr }}"
+    group: "{{ adm_usr }}"
+  when: out.stat.exists == false
+
+- name: Install Odoo to {{ helix_home }}
+  copy:
+    src: "{{ odoo_installer }}/odoo"
+    dest: "{{ helix_home }}/"
+    remote_src: yes
+    owner: "{{ adm_usr }}"
+    group: "{{ adm_usr }}"
+  
+
+
+
+  

@@ -1,0 +1,10 @@
+---
+# tasks file for gitclone
+
+
+- name: Check and Create Directory
+  import_tasks: createDirectory.yml
+
+- name: Git Clone 
+  import_tasks: gitClone.yml
+  

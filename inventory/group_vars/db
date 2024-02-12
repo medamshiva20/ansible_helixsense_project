@@ -1,0 +1,20 @@
+db_backup: true
+bkp_to: '/tmp/db.sql.{{ ansible_date_time.date }}.tar.gz'
+db_restore: false
+bkp_frm: "/tmp/helix-api/db.sql.tar.gz"
+
+db_install: false
+
+postgresql_version: "10"
+# postgresql_data_dir: "/var/lib/postgresql/{{ postgresql_version }}/main"
+# postgresql_bin_path: "/usr/lib/postgresql/{{ postgresql_version }}/bin"
+# postgresql_config_path: "/etc/postgresql/{{ postgresql_version }}/main"
+postgresql_daemon: postgresql
+deb_dependencies: ['postgresql-contrib','libpq-dev','postgresql']
+python3_libraries: ['python3-psycopg2']
+python_libraries: ['python-psycopg2',python-pip]
+postgresql_locale: 'en_US.UTF-8'
+postgresql_privileges: 'CREATEDB,NOSUPERUSER' #User db_user Privileges
+#name: "{{ helix_instance_name }}db"
+#user: "{{ adm_usr }}"
+#password: "{{ adm_usr }}"

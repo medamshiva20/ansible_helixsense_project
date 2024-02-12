@@ -1,0 +1,9 @@
+
+- name: Install Ansible PM2 Module
+  pip:
+    name: ansible-modules-pm2
+
+- name: Install PM2
+  npm:
+    name: pm2
+    global: yes

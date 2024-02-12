@@ -1,0 +1,41 @@
+- name: "Create {{ helix_instance_name }} if it does not exist"
+  file:
+    path: "/etc/{{ helix_instance_name }}"
+    state: directory
+    mode: '0755'
+
+- name: "Create {{ helix_instance_name }} log directoryif it does not exist"
+  file:
+    path: "/var/log/{{ helix_instance_name }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ adm_usr }}"
+    group: "{{ adm_usr }}" 
+   
+- name: Copy configuration to etc
+  template: 
+    src: helixsense.conf.j2 
+    dest: "/etc/{{ helix_instance_name }}/helixsense.conf"
+
+- name: Add {{ helix_instance_name }} as service
+  template: 
+    src: helixsense.service.j2
+    dest: /lib/systemd/system/{{ helix_instance_name }}.service
+  
+
+- name: "Test Database connection"
+  postgresql_ping:
+    db: "{{ db['name'] }}"
+    login_host: "{{ db['host'] }}"
+    login_user: "{{ db['user'] }}"
+    login_password: "{{ db['password'] }}"
+  register: db_conn_test
+
+- debug:
+    var: db_conn_test
+  
+- name: Add {{ helix_instance_name }} service to startup
+  service: 
+    name: "{{ helix_instance_name }}.service"
+    state: started
+    enabled: yes

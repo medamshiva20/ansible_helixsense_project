@@ -1,0 +1,18 @@
+---
+# tasks file for odoo
+
+- name: Setup Odoo base
+  import_tasks: odooBase.yml
+  become: true
+
+- name: Get Wkhtmltopdf Ubuntu
+  import_tasks: installWkhtmltoPdf_deb.yml
+  become: true
+  when:
+     - ansible_os_family == 'Debian'
+
+- name: Get Wkhtmltopdf RPM
+  import_tasks: installWkhtmltoPdf_rpm.yml
+  become: true
+  when:
+     - ansible_os_family == 'RedHat'

@@ -1,0 +1,28 @@
+#- name: "List All HelixModules"
+- set_fact:
+    module_install: "{{ helix_home }}/odoo-venv/bin/python3 {{ helix_home }}/odoo/odoo-bin -c /etc/{{ helix_instance_name }}/helixsense.conf"
+
+- name: Create temporary file
+  tempfile:
+    state: file
+    suffix: addons
+  register: tempfile
+
+- name: Stop HelixSense service
+  become: true
+  service:
+    name: "{{ helix_instance_name }}"
+    state: stopped
+
+- name: "Init Helix Addons"
+  become_user: "{{ adm_usr }}"
+  command: "{{ module_install }} -i all --stop-after-init"
+  when: tempfile.path is defined
+
+- name: "Update Helix Addons"
+  become_user: "{{ adm_usr }}"
+  command: "{{ module_install }} -u all --stop-after-init"
+  notify: 
+    - Restart HelixSense Service
+  when: tempfile.path is defined
+  

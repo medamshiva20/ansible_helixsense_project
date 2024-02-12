@@ -1,0 +1,33 @@
+- name: "Install PostgreSQL python dependencies - Ubuntu 20 & above"
+  apt:
+    name: "{{ python3_libraries }}"
+    state: present
+  when:
+     - ansible_distribution == "Ubuntu"
+     - ansible_distribution_version >= "20"
+
+- name: "Install PostgreSQL python dependencies - below Ubuntu 20 "
+  apt:
+    name: "{{ python_libraries }}"
+    state: present
+  when:
+     - ansible_distribution == "Ubuntu"
+     - ansible_distribution_version < "20"
+
+- name: "Install PostgreSQL dependencies - Deb"
+  apt:
+    name: "{{ deb_dependencies }}"
+    state: present
+  when:
+     - ansible_os_family == 'Debian'
+
+- name: "Set locale"
+  locale_gen:
+    name: "{{ postgresql_locale }}"
+    state: present
+
+- name: "Install Python module Ipaddress through pip"
+  pip:
+    name: ipaddress
+    
+

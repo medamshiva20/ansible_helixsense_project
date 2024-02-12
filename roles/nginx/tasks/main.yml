@@ -1,0 +1,14 @@
+---
+# tasks file for nginx
+- name: Install Nginx
+  import_tasks: installNginx.yml
+  become: true
+
+- name: Create VHosts
+  include_tasks: createVHosts.yml
+  loop: "{{ lookup('dict', vhosts) }}"
+  
+- name: Restart Nginx post configuration
+  command: /bin/true
+  notify:
+  - Restart nginx

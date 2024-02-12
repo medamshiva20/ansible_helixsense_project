@@ -1,0 +1,96 @@
+---
+
+- hosts: localhost
+  become: yes
+  
+  tasks:
+  - name: deploy-web | stop the existing process {{ pm2_service }}
+    shell: sudo pm2 stop {{ pm2_service }}
+    become_user: "{{ user }}"
+
+  # - name: deploy-web | kill port {{ port }}
+  #   shell: "kill `sudo netstat -lntp | grep {{ port }} | rev | awk {'print $1'} |rev | cut -d / -f1`"
+  #   become_user: "{{ user }}"
+
+  - name: deploy-web | Remove previous artifacts
+    file:
+      state: absent
+      path: "{{ item }}"
+    with_items:
+    - /tmp/hsensewebapp.zip
+    - /tmp/package
+    - "{{ web_dir }}/jumpcloud"
+    - "{{ web_dir }}/dist"
+    - "{{ web_dir }}/powerBi.js"
+    - "{{ web_dir }}/server.js"
+    - "{{ web_dir }}/yarn.lock"
+    - "{{ web_dir }}/env.sh"
+    - "{{ web_dir }}/run.sh"
+    - "{{ web_dir }}/package.json"
+    - "{{ web_dir }}/build"
+
+  - name: deploy-web | create .pm2 folder
+    file:
+      path: "{{ item }}"
+      state: directory
+      owner: "{{ user }}"
+      group: "{{ user }}"
+      mode: 0755
+    with_items:
+    - /opt/.pm2
+    - /opt/.pm2/logs
+    - /opt/.cache
+
+  - name: deploy-web | copy files from source to destination
+    copy:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      owner: "{{ item.owner }}"
+      group: "{{ item.group }}"
+      mode: "{{ item.mode }}"
+    with_items:
+    - { src: 'hsensewebapp.zip', dest: '/tmp/', owner: "{{ user }}", group: "{{ user }}", mode: '0755' }
+    - { src: 'env.sh', dest: "{{ web_dir }}/env.sh", owner: "{{ user }}", group: "{{ user }}", mode: '0755'}
+    - { src: 'run.sh', dest: "{{ web_dir }}/run.sh", owner: "{{ user }}", group: "{{ user }}", mode: '0755'}
+
+  - name: deploy-web | unarchiving artifact   
+    unarchive:
+      src: "{{ item }}"
+      dest: /tmp/
+      remote_src: yes
+      owner: "{{ user }}"
+      group: "{{ user }}"
+      mode: 0755
+    with_items:
+    - /tmp/hsensewebapp.zip
+
+  - name: deploy-web | copy the package folder to {{ web_dir }} directory
+    copy:
+      src: "/tmp/package/"
+      dest: "{{ web_dir }}/"
+
+  - name: deploy-web | change folder permissions
+    file:
+      dest: "{{ web_dir }}" 
+      owner: "{{ user }}" 
+      group: "{{ user }}"
+      recurse: yes
+
+  - name: deploy-web | running yarn install --production
+    command: "{{ item.command }}"
+    become_user: "{{ user }}"
+    args:
+      chdir: "{{ web_dir }}"
+    with_items: 
+    - { command: 'yarn install --production' }
+    ignore_errors: yes
+
+  - name: deploy-web | generate env.js and start application
+    command: "{{ item.command }}"
+    become_user: "{{ user }}"
+    args:
+      chdir: "{{ web_dir }}"
+    with_items:
+    - { command: 'sudo bash env.sh' }
+    - { command: 'sudo bash run.sh' }
+...

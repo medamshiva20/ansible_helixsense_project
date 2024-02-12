@@ -1,0 +1,21 @@
+---
+- hosts: db
+  roles:
+    - postgresql
+    - deployDB
+
+- hosts: api
+  roles:
+    - common
+    - upgrade
+    - gitclone
+    - odoo
+    - python-venv
+    - deployHelixAPI
+    - upstallHelixAddOns
+
+- hosts: web
+  roles:
+    - nginx
+    - gitclone
+    - deployNode-yarn

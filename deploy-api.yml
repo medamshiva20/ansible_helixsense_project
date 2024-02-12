@@ -1,0 +1,107 @@
+---
+- name: Playbook for API release deployment
+  hosts: localhost
+  become: yes
+
+  tasks:
+  - name: deploy-api | set variable for helix binary {{ user }}
+    set_fact:
+      #module_install: "/opt/{{ user }}/odoo-venv/bin/python3 /opt/{{ user }}/odoo/odoo-bin -c /etc/{{ user }}.conf"
+      module_install: "/opt/{{ user }}/hsense-erpv3/odoo-venv/bin/python3  /opt/{{ user }}/hsense-erpv3/odoo/odoo-bin -c /etc/{{ user }}.conf"
+
+  - name: deploy-api | stop api service
+    service:
+      name: "{{ user }}"
+      state: stopped
+    register: service_status
+
+  - name: deploy-api | setting the service_stopped variable
+    set_fact:
+      service_stopped: "{{ service_status.state == 'stopped' }}"
+
+  - name: deploy-api | copy api artifact to vm
+    copy: 
+      src: "{{ item }}"
+      dest: /tmp/
+    with_items:
+    - hsenseapi.zip
+
+  - name: deploy-api | unarchive hsense repo folder
+    unarchive:
+      src: /tmp/hsenseapi.zip
+      dest: /tmp/
+      owner: "{{ user }}"
+      group: "{{ user }}"
+      mode: 0755
+
+  - name: deploy-api | get the addons list from the current mro_addons folder
+    shell: "ls /opt/{{ user }}/hsense-erpv3/mro_addons >/home/azureuser/current-addons.txt"
+    ignore_errors: yes
+ 
+  - name: deploy-api | get the addons list from the artifact
+    shell: "grep -Fxvf /home/azureuser/current-addons.txt /tmp/api/addons.txt >/tmp/updated-addons.txt"
+    ignore_errors: yes
+
+  - name: deploy-api | remove old api artifact from /tmp folder
+    file:
+      state: absent
+      path: "{{ item }}"
+    with_items:
+    - /opt/{{ user }}/hsense-erpv3/CHANGELOG.md
+    - /opt/{{ user }}/hsense-erpv3/VERSION
+    - /opt/{{ user }}/hsense-erpv3/addons.txt
+    - /opt/{{ user }}/hsense-erpv3/addonsBuildDetails.txt
+    - /opt/{{ user }}/hsense-erpv3/audit-management-addons-12
+    - /opt/{{ user }}/hsense-erpv3/bump-version.sh
+    - /opt/{{ user }}/hsense-erpv3/generic-addons-12.0
+    - /opt/{{ user }}/hsense-erpv3/mro_addons    
+    - /opt/{{ user }}/hsense-erpv3/scripts
+    - /opt/{{ user }}/hsense-erpv3/db_views
+
+  - name: deploy-api | copy the contents to /opt/{{ user }}/hsense-erpv3 folder
+    shell: "cp -rf /tmp/api/* /opt/{{ user }}/hsense-erpv3/"
+
+  - name: deploy-api | Get the addons for upgrade
+    shell: cat addons.txt | grep -v '^//' | grep -v '^$'
+    register: addons
+    args:
+      chdir: /opt/{{ user }}/hsense-erpv3/
+
+  - name: deploy-api | initialize Helix Addons using loop
+    become_user: "{{ user }}"
+    args:
+      chdir: /opt/{{ user }}/hsense-erpv3/
+    shell: "{{ module_install }} -i {{ item }} --stop-after-init"
+    loop: "{{ addons.stdout_lines }}"
+    ignore_errors: yes
+
+  - name: deploy-api | upgrade Helix Addons using loop
+    become_user: "{{ user }}"
+    args:
+      chdir: /opt/{{ user }}/hsense-erpv3/
+    shell: "{{ module_install }} -u {{ item }} --stop-after-init"
+    loop: "{{ addons.stdout_lines }}"
+    ignore_errors: yes
+
+  # - name: deploy-api | upgrade Helix Addons using loop
+  #   become_user: "{{ user }}"
+  #   shell: "{{ item }}"
+  #   with_items:
+  #   - /opt/{{ user }}/hsense-erpv3/odoo-venv/bin/python3  /opt/{{ user }}/hsense-erpv3/odoo/odoo-bin -c /etc/{{ user }}.conf -i mro_dmr_extended --stop-after-init
+  #   - /opt/{{ user }}/hsense-erpv3/odoo-venv/bin/python3  /opt/{{ user }}/hsense-erpv3/odoo/odoo-bin -c /etc/{{ user }}.conf -u mro_dmr_extended --stop-after-init
+  #   ignore_errors: true
+
+  - name: deploy-api | start api service
+    service:
+      name: "{{ user }}"
+      state: restarted
+      enabled: yes 
+
+  - name: deploy-api | cleanup /tmp
+    file:
+      state: absent
+      path: "{{ item }}"
+    with_items:
+    - /tmp/hsenseapi.zip
+    - /tmp/api
+...

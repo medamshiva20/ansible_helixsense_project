@@ -1,0 +1,39 @@
+parameters:
+  - name: customer
+    displayName: 'select customer'
+    type: string
+    values:
+      - cbre
+  - name: environment
+    displayName: 'select environment'
+    type: string
+    values:
+      - dev
+      - prod
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: DownloadSecureFile@1
+    name: keyStoreDetails
+    displayName: 'Download ansible private key'
+    inputs:
+      secureFile: 'id_rsa_majeed'
+
+  - script: |
+      echo "show variables and list contents"
+      echo ${{ parameters.environment }}
+      echo ${{ parameters.customer }}
+      echo "copied $(keyStoreDetails.secureFilePath) to the base directory"
+      cp $(keyStoreDetails.secureFilePath) .
+      ls
+      chmod 0400 id_rsa_majeed
+      ls -lrth id_rsa_majeed
+    displayName: "show variables and change permission for key"
+
+  - script: |
+      echo "run playbook"
+      echo "Running ansible playbook for host ${{ parameters.customer }}-${{ parameters.environment }}"
+      ansible-playbook -i inventory/${{ parameters.environment }} deploy-api.yml -l ${{ parameters.customer }}-${{ parameters.environment }} --ssh-common-args='-o StrictHostKeyChecking=no' -u majeed --key-file id_rsa_majeed
+    displayName: "Running Ansible Playbook for API"

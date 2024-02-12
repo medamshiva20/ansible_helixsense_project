@@ -1,0 +1,13 @@
+- name: "Create {{ helix_home }} if it does not exist"
+  file:
+    path: "{{ node_home }}/{{ item.value.vhost_name }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ adm_usr }}"
+    group: "{{ adm_usr }}"
+  
+- name: Start server.js, if not running
+  pm2:
+    name: server
+    script: "{{ node_home }}/{{ item.value.vhost_name }}/server.js"
+    state: started

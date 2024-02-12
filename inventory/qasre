@@ -1,0 +1,13 @@
+[all]
+hsense-qasre-web ansible_host=20.235.111.103
+hsense-qasre-api ansible_host=20.235.111.103
+hsense-qasre-db ansible_host=20.235.111.103
+
+[web]
+hsense-qasre-web
+
+[api]
+hsense-qasre-api
+
+[db]
+hsense-qasre-db

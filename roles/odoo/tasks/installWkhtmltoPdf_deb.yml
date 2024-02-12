@@ -1,0 +1,10 @@
+- name: Download Wkhtmltopdf 
+  get_url:
+    url: "{{ wkhtmltopdf['url'] }}/{{ wkhtmltopdf['ver'] }}/{{ wkhtmltopdf['apt_pkg'] }}"
+    dest: "/tmp/{{ wkhtmltopdf.apt_pkg }}"
+    validate_certs: no
+  
+- name: Install Wkhtmltopdf package
+  apt:
+    deb: "/tmp/{{ wkhtmltopdf['apt_pkg'] }}"
+    state: present

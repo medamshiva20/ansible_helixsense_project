@@ -1,0 +1,41 @@
+parameters:
+  - name: major_version
+    displayName: majorVersion
+    type: string
+  - name: minor_version
+    displayName: minorVersion
+    type: string
+  - name: feed_name
+    displayName: feedName
+    type: string
+    values:
+      - test
+  - name: customer
+    displayName: 'select customer'
+    type: string
+    values:
+      - sfx
+      - hsense
+  - name: environment
+    displayName: 'select environment'
+    type: string
+    values:
+      - dev
+      - qa
+      - preprod
+
+variables:
+  - group: hsense-android-sfx-preprod
+  - name: application_id
+    value: hsense-android-sfx-preprod-application-id
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - script: |
+      echo "get environment variables"
+      echo $(application_id)
+      echo ${{ parameters.environment }}
+      echo $(${{ variables.application_id }})
+    displayName: "get env values"

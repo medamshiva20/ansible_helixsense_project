@@ -1,0 +1,9 @@
+---
+# tasks file for deployNode
+- name: "Install PM2"
+  import_tasks: installPM2.yml
+  become: true
+
+- name: "Deploy artifacts"
+  import_tasks: deployNodeApp.yml
+  become: true

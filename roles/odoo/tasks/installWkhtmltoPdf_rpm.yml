@@ -1,0 +1,10 @@
+- name: Download Wkhtmltopdf 
+  get_url:
+    url: "{{ wkhtmltopdf['url'] }}/{{ wkhtmltopdf['ver'] }}/{{ wkhtmltopdf['rpm_pkg'] }}"
+    dest: "/tmp/{{ wkhtmltopdf.rpm_pkg }}"
+    validate_certs: no
+  
+- name: Install Wkhtmltopdf package
+  yum:
+    name: "/tmp/{{ wkhtmltopdf['rpm_pkg'] }}"
+    state: present

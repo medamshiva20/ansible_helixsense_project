@@ -1,0 +1,24 @@
+- set_fact:
+    hx_vhost: "{{ item.value.vhost_name }}"
+    proxy_url: "{{ item.value.proxy_pass_url }}"
+    ssl_loc: /etc/nginx/sites-available
+
+- name: Copy VHosts to site-available
+  template:
+    src: nginx-vhost.conf.j2
+    dest: /etc/nginx/sites-available/{{ item.value.vhost_name }}
+  
+  become: true
+
+- name: Create Self-signed certificates
+  include_role: 
+    name: selfSignedCert
+  when: "item.value.selfSigned == true"
+
+- name: Soft link site-enabled
+  file:
+    dest: /etc/nginx/sites-enabled/{{ item.value.vhost_name }}
+    src: /etc/nginx/sites-available/{{ item.value.vhost_name }}
+    state: link
+  become: true
+  

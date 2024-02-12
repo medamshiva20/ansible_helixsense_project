@@ -1,0 +1,9 @@
+---
+# tasks file for postgresql
+- name: Install Dependencies
+  import_tasks: installDependency.yml
+  become: true
+
+- name: Create user and DB
+  import_tasks: createDB.yml
+  become: true

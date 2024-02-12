@@ -1,0 +1,9 @@
+---
+#tasks file for deployNode-yarn
+- name: Install PM2
+  import_tasks: installPM2.yml
+  become: true
+
+- name: Install Update HelixSense web
+  include_tasks: deployWeb.yml
+  loop: "{{ lookup('dict', vhosts) }}"

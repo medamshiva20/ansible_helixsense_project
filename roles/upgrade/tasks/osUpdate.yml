@@ -1,0 +1,14 @@
+- name: "Update Ubuntu"
+  apt:
+    update_cache: yes
+    upgrade: 'yes'   
+  when:
+     - ansible_distribution == "Ubuntu"
+
+- name: "Update CentOS"
+  yum:
+    name: '*'
+    state: latest
+    exclude: kernel*
+  when:
+     - ansible_distribution == "CentOS"

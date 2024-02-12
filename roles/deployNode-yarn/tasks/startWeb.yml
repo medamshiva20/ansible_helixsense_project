@@ -1,0 +1,6 @@
+  
+- name: Start server.js, if not running
+  pm2:
+    name: server
+    script: "{{ node_home }}/{{ item.value.vhost_name }}/server.js"
+    state: started

@@ -1,0 +1,11 @@
+[all]
+cbre-dev ansible_host=4.240.59.252
+
+[web]
+cbre-dev
+
+[api]
+cbre-dev
+
+[db]
+cbre-dev

@@ -1,0 +1,16 @@
+---
+# tasks file for upstallHelixAddOns
+# - name: Stop Service
+#   #become: true
+#   include_tasks: serviceRecycle.yml
+#   tags: stopHXService
+
+- name: "Install Update HelixSense Add-Ons"
+  import_tasks: helixAddOns.yml
+  become: true
+  # loop: "{{ lookup('vars', helix_addons) }}"
+
+# - name: Restart Service
+#   #become: true
+#   include_tasks: serviceRecycle.yml
+#   tags: restartHXService
